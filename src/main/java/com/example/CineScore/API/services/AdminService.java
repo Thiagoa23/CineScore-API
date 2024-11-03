@@ -28,12 +28,25 @@ public class AdminService {
     @Autowired
     private GenreRepository genreRepository;
 
-    public Optional<Admin> registerAdmin(Admin admin) {
-        // Verifica se o username é único entre Admins
-        if (adminRepository.findByUsername(admin.getUsername()).isPresent()) {
-            return Optional.empty(); // Retorna vazio se o nome de usuário já existir entre administradores
+    public Optional<Admin> registerAdmin(Admin newAdmin, String requestingAdminId) {
+        Optional<Admin> requestingAdmin = adminRepository.findById(requestingAdminId);
+        if (requestingAdmin.isPresent() && requestingAdmin.get().isFounder()) {
+            return Optional.of(adminRepository.save(newAdmin)); // Apenas fundador pode adicionar admins
         }
-        return Optional.of(adminRepository.save(admin));
+        return Optional.empty(); // Negar acesso se não for o fundador
+    }
+    
+    public boolean deleteAdmin(String adminIdToDelete, String requestingAdminId) {
+        Optional<Admin> requestingAdmin = adminRepository.findById(requestingAdminId);
+        Optional<Admin> adminToDelete = adminRepository.findById(adminIdToDelete);
+    
+        if (requestingAdmin.isPresent() && requestingAdmin.get().isFounder() && adminToDelete.isPresent()) {
+            if (!adminToDelete.get().isFounder()) {
+                adminRepository.deleteById(adminIdToDelete); // Fundador pode deletar outros admins
+                return true;
+            }
+        }
+        return false; // Negar acesso se não for o fundador ou tentando excluir o fundador
     }
 
     public void banUser(String userId, String level) {

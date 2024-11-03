@@ -9,11 +9,14 @@ import lombok.NoArgsConstructor;
 @Getter
 @Setter
 @NoArgsConstructor
-@Document(collection = "admin")
+@Document(collection = "admins")
 public class Admin extends BaseUser {
 
-    public Admin(String username, String password) {
-        super(username, password, "ADMIN");
-    }
+    private boolean isFounder = false;
 
+    public Admin(String username, String password, boolean isFounder) {
+        super(username, password, "ADMIN");
+        this.isFounder = isFounder;
+    }
 }
+

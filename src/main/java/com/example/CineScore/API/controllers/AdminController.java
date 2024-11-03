@@ -5,6 +5,7 @@ import com.example.CineScore.API.models.Movie;
 import com.example.CineScore.API.models.Genre;
 import com.example.CineScore.API.services.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,14 +20,21 @@ public class AdminController {
     private AdminService adminService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerAdmin(@RequestBody Admin admin) {
-        Optional<Admin> savedAdmin = adminService.registerAdmin(admin);
+    public ResponseEntity<?> registerAdmin(@RequestBody Admin newAdmin, @RequestParam String requestingAdminId) {
+        Optional<Admin> savedAdmin = adminService.registerAdmin(newAdmin, requestingAdminId);
 
         if (savedAdmin.isPresent()) {
             return ResponseEntity.ok(savedAdmin.get());
         } else {
-            return ResponseEntity.badRequest().body("Username already exists");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permission denied");
         }
+    }
+
+    @DeleteMapping("/{adminId}")
+    public ResponseEntity<?> deleteAdmin(@PathVariable String adminId, @RequestParam String requestingAdminId) {
+        boolean deleted = adminService.deleteAdmin(adminId, requestingAdminId);
+        return deleted ? ResponseEntity.ok("Admin deleted successfully")
+                : ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permission denied");
     }
 
     @PostMapping("/login")
@@ -43,5 +51,4 @@ public class AdminController {
         return ResponseEntity.ok("Admin logged out successfully");
     }
 
-   
 }
