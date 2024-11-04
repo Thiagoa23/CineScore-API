@@ -9,7 +9,9 @@ import com.example.CineScore.API.repositories.UserRepository;
 import com.example.CineScore.API.repositories.MovieRepository;
 import com.example.CineScore.API.repositories.GenreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -28,26 +30,45 @@ public class AdminService {
     @Autowired
     private GenreRepository genreRepository;
 
-    public Optional<Admin> registerAdmin(Admin newAdmin, String requestingAdminId) {
-        Optional<Admin> requestingAdmin = adminRepository.findById(requestingAdminId);
-        if (requestingAdmin.isPresent() && requestingAdmin.get().isFounder()) {
-            return Optional.of(adminRepository.save(newAdmin)); // Apenas fundador pode adicionar admins
+    public Admin registerAdmin(Admin newAdmin, String requestingAdminId) {
+        if (adminRepository.count() == 0) {
+            // Não há administradores; registra o primeiro como fundador
+            newAdmin.setFounder(true);
+            newAdmin.setRole("FOUNDER");
+            return adminRepository.save(newAdmin);
         }
-        return Optional.empty(); // Negar acesso se não for o fundador
+    
+        Optional<Admin> requestingAdmin = adminRepository.findById(requestingAdminId);
+        if (requestingAdmin.isEmpty() || !requestingAdmin.get().isFounder()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Permission denied");
+        }
+    
+        if (adminRepository.findByUsername(newAdmin.getUsername()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Conflict");
+        }
+        
+        newAdmin.setRole("ADMIN");
+        return adminRepository.save(newAdmin);
     }
     
-    public boolean deleteAdmin(String adminIdToDelete, String requestingAdminId) {
+    public boolean deleteAdmin(String adminId, String requestingAdminId) {
+        // Verifica se o administrador solicitante é o fundador
         Optional<Admin> requestingAdmin = adminRepository.findById(requestingAdminId);
-        Optional<Admin> adminToDelete = adminRepository.findById(adminIdToDelete);
-    
-        if (requestingAdmin.isPresent() && requestingAdmin.get().isFounder() && adminToDelete.isPresent()) {
-            if (!adminToDelete.get().isFounder()) {
-                adminRepository.deleteById(adminIdToDelete); // Fundador pode deletar outros admins
-                return true;
-            }
+        if (requestingAdmin.isEmpty() || !requestingAdmin.get().isFounder()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the founder can delete admins");
         }
-        return false; // Negar acesso se não for o fundador ou tentando excluir o fundador
+        
+        // Verifica se o adminId existe antes de tentar excluir
+        Optional<Admin> adminToDelete = adminRepository.findById(adminId);
+        if (adminToDelete.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin not found");
+        }
+        
+        // Realiza a exclusão do administrador
+        adminRepository.deleteById(adminId);
+        return true;
     }
+    
 
     public void banUser(String userId, String level) {
         Optional<User> userOpt = userRepository.findById(userId);

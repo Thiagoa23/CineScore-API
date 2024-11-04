@@ -1,13 +1,12 @@
 package com.example.CineScore.API.controllers;
 
 import com.example.CineScore.API.models.Admin;
-import com.example.CineScore.API.models.Movie;
-import com.example.CineScore.API.models.Genre;
 import com.example.CineScore.API.services.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 import java.util.Optional;
@@ -20,13 +19,13 @@ public class AdminController {
     private AdminService adminService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerAdmin(@RequestBody Admin newAdmin, @RequestParam String requestingAdminId) {
-        Optional<Admin> savedAdmin = adminService.registerAdmin(newAdmin, requestingAdminId);
-
-        if (savedAdmin.isPresent()) {
-            return ResponseEntity.ok(savedAdmin.get());
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permission denied");
+    public ResponseEntity<?> registerAdmin(@RequestBody Admin newAdmin,
+            @RequestParam(required = false) String requestingAdminId) {
+        try {
+            Admin savedAdmin = adminService.registerAdmin(newAdmin, requestingAdminId);
+            return ResponseEntity.ok(savedAdmin);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         }
     }
 
