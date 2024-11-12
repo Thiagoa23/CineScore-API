@@ -5,6 +5,7 @@ import com.example.CineScore.API.repositories.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,7 +57,22 @@ public class MovieService {
 
     // Buscar Filmes por Gênero
     public List<Movie> findMoviesByGenre(String genreId) {
-        return movieRepository.findByGenresContaining(genreId);
+        List<Movie> moviesByPrimaryGenre = movieRepository.findByPrimaryGenre(genreId);
+        List<Movie> moviesByOtherGenres = movieRepository.findByOtherGenresContaining(genreId);
+
+        List<Movie> allMovies = new ArrayList<>(moviesByPrimaryGenre);
+        allMovies.addAll(moviesByOtherGenres);
+
+        return allMovies;
+    }
+
+    // Método para buscar o Top 10 filmes com maior classificação
+    public List<Movie> getTop10Movies() {
+        return movieRepository.findTop10ByOrderByRatingDesc();
+    }
+
+    public List<Movie> getLatestMovies() {
+        return movieRepository.findTop5ByOrderByReleaseDateDesc(); // Ajuste o número conforme necessário
     }
 
     // Adicionar Avaliação ao Filme

@@ -7,6 +7,7 @@ import com.example.CineScore.API.repositories.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,6 +62,12 @@ public class GenreService {
 
     // Listar Filmes de um Gênero
     public List<Movie> findMoviesByGenre(String genreId) {
-        return movieRepository.findByGenresContaining(genreId);
+        List<Movie> moviesByPrimaryGenre = movieRepository.findByPrimaryGenre(genreId);
+        List<Movie> moviesByOtherGenres = movieRepository.findByOtherGenresContaining(genreId);
+        
+        List<Movie> allMovies = new ArrayList<>(moviesByPrimaryGenre);
+        allMovies.addAll(moviesByOtherGenres);
+        
+        return allMovies;
     }
 }

@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/movies")
+@CrossOrigin(origins = "http://localhost:3000")
 public class MovieController {
 
     @Autowired
@@ -62,6 +63,19 @@ public class MovieController {
     public ResponseEntity<List<Movie>> getMoviesByGenre(@PathVariable String genreId) {
         List<Movie> movies = movieService.findMoviesByGenre(genreId);
         return ResponseEntity.ok(movies);
+    }
+
+    // Endpoint para retornar o Top 10 filmes
+    @GetMapping("/top10")
+    public List<Movie> getTop10Movies() {
+        return movieService.getTop10Movies();
+    }
+
+    // Endpoint para retornar os últimos filmes lançados (limite de 5)
+    @GetMapping("/latest")
+    public ResponseEntity<List<Movie>> getLatestMovies() {
+        List<Movie> latestMovies = movieService.getLatestMovies();
+        return ResponseEntity.ok(latestMovies);
     }
 
     // Endpoint para adicionar uma avaliação a um filme

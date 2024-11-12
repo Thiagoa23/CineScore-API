@@ -7,8 +7,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,17 +19,7 @@ public class Genre {
     @Indexed(unique = true) // Garante unicidade do nome do gênero
     private String name;
 
-    private Boolean primaryGenre;
-    private List<String> associatedMovies; // Lista de IDs de filmes associados a esse gênero
-
-    public Genre(String name, Boolean primaryGenre) {
+    public Genre(String name) {
         this.name = name;
-        this.primaryGenre = primaryGenre;
-    }
-
-    public Genre(String name, Boolean primaryGenre, List<String> associatedMovies) {
-        this.name = name;
-        this.primaryGenre = primaryGenre;
-        this.associatedMovies = associatedMovies;
     }
 }

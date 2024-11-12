@@ -29,21 +29,24 @@ public class Movie {
     private LocalDate releaseDate;
     private String director;
     private List<String> actors;
-    private Double averageRating = 0.0;
+    private Double rating = 0.0;
     private Map<Integer, Integer> ratings = new HashMap<>(); // Mapa para contagem de votos por estrela (1-5)
     private String imageUrl;
-    private List<String> genres; // Lista de IDs de gênero associados ao filme
+    private String primaryGenre;
+    private List<String> otherGenres; // Lista de IDs de gênero associados ao filme
 
     private List<Comment> comments = new ArrayList<>();
 
 
-    public Movie(String name, String synopsis, LocalDate releaseDate, String director, List<String> actors, String imageUrl) {
+    public Movie(String name, String synopsis, LocalDate releaseDate, String director, List<String> actors, String imageUrl, String primaryGenre, List<String> otherGenres) {
         this.name = name;
         this.synopsis = synopsis;
         this.releaseDate = releaseDate;
         this.director = director;
         this.actors = actors;
         this.imageUrl = imageUrl;
+        this.primaryGenre = primaryGenre;
+        this.otherGenres = otherGenres;
 
         // Inicializa o mapa de ratings com contagens zeradas
         for (int i = 1; i <= 5; i++) {
@@ -70,7 +73,7 @@ public class Movie {
             totalScore += stars * count;
         }
 
-        this.averageRating = totalVotes > 0 ? (double) totalScore / totalVotes : 0.0;
+        this.rating = totalVotes > 0 ? (double) totalScore / totalVotes : 0.0;
     }
 
     public void addComment(Comment comment) {
