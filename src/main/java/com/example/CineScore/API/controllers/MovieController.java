@@ -40,14 +40,14 @@ public class MovieController {
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
-    // Endpoint para listar todos os filmes
+    // Endpoint para listar todos os filmes com gêneros expandidos
     @GetMapping
     public ResponseEntity<List<Movie>> getAllMovies() {
         List<Movie> movies = movieService.getAllMovies();
         return ResponseEntity.ok(movies);
     }
 
-    // Endpoint para buscar um único filme por nome
+    // Endpoint para buscar filmes por nome com gêneros expandidos
     @GetMapping("/search")
     public ResponseEntity<List<Movie>> searchMovies(@RequestParam String name) {
         List<Movie> movies = movieService.findMoviesByName(name);
@@ -58,24 +58,32 @@ public class MovieController {
         }
     }
 
-    // Endpoint para listar filmes por gênero
+    // Endpoint para listar filmes por gênero com gêneros expandidos
     @GetMapping("/genre/{genreId}")
     public ResponseEntity<List<Movie>> getMoviesByGenre(@PathVariable String genreId) {
         List<Movie> movies = movieService.findMoviesByGenre(genreId);
         return ResponseEntity.ok(movies);
     }
 
-    // Endpoint para retornar o Top 10 filmes
+    // Endpoint para retornar o Top 10 filmes com gêneros expandidos
     @GetMapping("/top10")
-    public List<Movie> getTop10Movies() {
-        return movieService.getTop10Movies();
+    public ResponseEntity<List<Movie>> getTop10Movies() {
+        List<Movie> top10Movies = movieService.getTop10Movies();
+        return ResponseEntity.ok(top10Movies);
     }
 
-    // Endpoint para retornar os últimos filmes lançados (limite de 5)
+    // Endpoint para retornar os últimos filmes lançados com gêneros expandidos
     @GetMapping("/latest")
     public ResponseEntity<List<Movie>> getLatestMovies() {
         List<Movie> latestMovies = movieService.getLatestMovies();
         return ResponseEntity.ok(latestMovies);
+    }
+
+    // Endpoint para obter detalhes completos de um filme, incluindo `comments`
+    @GetMapping("/{movieId}")
+    public ResponseEntity<Movie> getMovieById(@PathVariable String movieId) {
+        Optional<Movie> movie = movieService.getMovieById(movieId);
+        return movie.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // Endpoint para adicionar uma avaliação a um filme

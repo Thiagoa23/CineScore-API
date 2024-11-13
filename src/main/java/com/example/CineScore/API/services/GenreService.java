@@ -60,14 +60,19 @@ public class GenreService {
         return genreRepository.findByName(name);
     }
 
+    // Buscar Gênero por ID
+    public Genre findById(String genreId) {
+        return genreRepository.findById(genreId).orElse(null); // Retorna o gênero ou null se não for encontrado
+    }
+
     // Listar Filmes de um Gênero
     public List<Movie> findMoviesByGenre(String genreId) {
         List<Movie> moviesByPrimaryGenre = movieRepository.findByPrimaryGenre(genreId);
         List<Movie> moviesByOtherGenres = movieRepository.findByOtherGenresContaining(genreId);
-        
+
         List<Movie> allMovies = new ArrayList<>(moviesByPrimaryGenre);
         allMovies.addAll(moviesByOtherGenres);
-        
+
         return allMovies;
     }
 }

@@ -32,11 +32,11 @@ public class Movie {
     private Double rating = 0.0;
     private Map<Integer, Integer> ratings = new HashMap<>(); // Mapa para contagem de votos por estrela (1-5)
     private String imageUrl;
-    private String primaryGenre;
+    private String primaryGenre; // ID do gênero principal
+    private String primaryGenreName; // Nome do gênero principal expandido
     private List<String> otherGenres; // Lista de IDs de gênero associados ao filme
-
+    private List<String> otherGenreNames = new ArrayList<>(); // Lista dos nomes dos gêneros secundários
     private List<Comment> comments = new ArrayList<>();
-
 
     public Movie(String name, String synopsis, LocalDate releaseDate, String director, List<String> actors, String imageUrl, String primaryGenre, List<String> otherGenres) {
         this.name = name;
@@ -78,5 +78,10 @@ public class Movie {
 
     public void addComment(Comment comment) {
         comments.add(comment);
+    }
+
+    // Método para definir os nomes dos gêneros secundários
+    public void setOtherGenreNames(List<String> otherGenreNames) {
+        this.otherGenreNames = otherGenreNames;
     }
 }

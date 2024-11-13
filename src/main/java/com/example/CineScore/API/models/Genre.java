@@ -16,7 +16,7 @@ public class Genre {
     @Id
     private String id;
 
-    @Indexed(unique = true) // Garante unicidade do nome do gênero
+    @Indexed(unique = true) 
     private String name;
 
     public Genre(String name) {
