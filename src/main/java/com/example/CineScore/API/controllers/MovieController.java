@@ -47,12 +47,16 @@ public class MovieController {
         return ResponseEntity.ok(movies);
     }
 
-    // Endpoint para buscar filmes por nome com gêneros expandidos
+    // Endpoint atualizado: Buscar filmes por termo no nome com gêneros expandidos
     @GetMapping("/search")
-    public ResponseEntity<List<Movie>> searchMovies(@RequestParam String name) {
-        List<Movie> movies = movieService.findMoviesByName(name);
+    public ResponseEntity<List<Movie>> searchMovies(@RequestParam("query") String query) {
+        if (query == null || query.isEmpty()) {
+            return ResponseEntity.badRequest().build(); // Retorna erro se o termo estiver vazio
+        }
+
+        List<Movie> movies = movieService.searchMoviesByName(query);
         if (movies.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build(); // Retorna 204 se não encontrar resultados
         } else {
             return ResponseEntity.ok(movies);
         }

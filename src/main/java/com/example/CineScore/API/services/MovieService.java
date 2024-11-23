@@ -6,9 +6,12 @@ import com.example.CineScore.API.repositories.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,7 +23,18 @@ public class MovieService {
     @Autowired
     private GenreService genreService;
 
-    // Método auxiliar para expandir o nome do gênero primário e os gêneros secundários
+    // Método auxiliar para normalizar strings (remover acentos e tornar minúsculas)
+    private String normalizeString(String input) {
+        if (input == null) {
+            return "";
+        }
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD); // Decompor acentos
+        return Pattern.compile("\\p{InCombiningDiacriticalMarks}+").matcher(normalized).replaceAll("") // Remove marcas
+                .toLowerCase(); // Torna minúscula
+    }
+
+    // Método auxiliar para expandir o nome do gênero primário e os gêneros
+    // secundários
     private Movie expandGenres(Movie movie) {
         if (movie.getPrimaryGenre() != null) {
             Genre primaryGenre = genreService.findById(movie.getPrimaryGenre());
@@ -31,12 +45,12 @@ public class MovieService {
 
         if (movie.getOtherGenres() != null && !movie.getOtherGenres().isEmpty()) {
             List<String> genreNames = movie.getOtherGenres().stream()
-                .map(genreId -> {
-                    Genre genre = genreService.findById(genreId);
-                    return genre != null ? genre.getName() : null;
-                })
-                .filter(name -> name != null)
-                .collect(Collectors.toList());
+                    .map(genreId -> {
+                        Genre genre = genreService.findById(genreId);
+                        return genre != null ? genre.getName() : null;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
             movie.setOtherGenreNames(genreNames);
         }
         return movie;
@@ -49,10 +63,13 @@ public class MovieService {
                 .collect(Collectors.toList());
     }
 
-    // Buscar filmes pelo nome com gêneros expandidos
-    public List<Movie> findMoviesByName(String name) {
-        return movieRepository.findByNameContainingIgnoreCase(name).stream()
-                .map(this::expandGenres)
+    // Novo método: Buscar filmes pelo termo no nome com normalização
+    public List<Movie> searchMoviesByName(String name) {
+        String normalizedQuery = normalizeString(name);
+
+        return movieRepository.findAll().stream()
+                .filter(movie -> normalizeString(movie.getName()).contains(normalizedQuery))
+                .map(this::expandGenres) // Expande os gêneros para retornar nomes no lugar de IDs
                 .collect(Collectors.toList());
     }
 
