@@ -1,8 +1,11 @@
 package com.example.CineScore.API.controllers;
 
 import com.example.CineScore.API.models.Movie;
+import com.example.CineScore.API.models.Admin;
+import com.example.CineScore.API.services.AdminService;
 import com.example.CineScore.API.services.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +19,9 @@ public class MovieController {
 
     @Autowired
     private MovieService movieService;
+
+    @Autowired
+    private AdminService adminService;
 
     // Endpoint para adicionar um novo filme
     @PostMapping
@@ -33,11 +39,27 @@ public class MovieController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Endpoint para remover um filme
+    // Endpoint para remover um filme com validação de administrador
     @DeleteMapping("/{movieId}")
-    public ResponseEntity<Void> deleteMovie(@PathVariable String movieId) {
-        boolean deleted = movieService.deleteMovie(movieId);
-        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    public ResponseEntity<?> deleteMovie(
+            @PathVariable String movieId,
+            @RequestParam String username,
+            @RequestParam String password) {
+
+        // Verificar se o usuário é um administrador válido
+        Optional<Admin> adminOpt = adminService.findByUsername(username);
+        if (adminOpt.isPresent() && adminOpt.get().getPassword().equals(password)) {
+            // Se as credenciais forem válidas, permite excluir o filme
+            boolean deleted = movieService.deleteMovie(movieId);
+            if (deleted) {
+                return ResponseEntity.ok("Movie deleted successfully");
+            } else {
+                return ResponseEntity.notFound().build(); // Filme não encontrado
+            }
+        }
+
+        // Caso contrário, negar permissão
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permission denied");
     }
 
     // Endpoint para listar todos os filmes com gêneros expandidos

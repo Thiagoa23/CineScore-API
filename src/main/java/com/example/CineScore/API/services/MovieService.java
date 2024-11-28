@@ -102,10 +102,17 @@ public class MovieService {
 
     // Obter os detalhes de um filme específico com todos os atributos
     public Optional<Movie> getMovieById(String movieId) {
-        Optional<Movie> movie = movieRepository.findById(movieId);
-        movie.ifPresent(this::expandGenres);
-        return movie;
+    System.out.println("Buscando filme com ID: " + movieId);
+    Optional<Movie> movie = movieRepository.findById(movieId);
+    if (movie.isPresent()) {
+        System.out.println("Filme encontrado: " + movie.get().getName());
+        expandGenres(movie.get());
+    } else {
+        System.out.println("Filme não encontrado para ID: " + movieId);
     }
+    return movie;
+}
+
 
     // Adicionar um novo filme
     public Optional<Movie> addMovie(Movie movie) {

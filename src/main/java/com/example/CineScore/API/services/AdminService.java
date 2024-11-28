@@ -118,6 +118,11 @@ public class AdminService {
         });
     }
 
+    public Optional<Admin> findByUsername(String username) {
+        return adminRepository.findByUsername(username);
+    }
+    
+
     public void logoutAdmin(String adminId) {
         // Lógica para logout do administrador
     }

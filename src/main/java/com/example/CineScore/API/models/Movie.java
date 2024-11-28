@@ -7,6 +7,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,8 +26,8 @@ public class Movie {
 
     @Indexed(unique = true) // Garante unicidade do nome do filme
     private String name;
-
     private String synopsis;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate releaseDate;
     private String director;
     private List<String> actors;
@@ -38,7 +40,8 @@ public class Movie {
     private List<String> otherGenreNames = new ArrayList<>(); // Lista dos nomes dos gêneros secundários
     private List<Comment> comments = new ArrayList<>();
 
-    public Movie(String name, String synopsis, LocalDate releaseDate, String director, List<String> actors, String imageUrl, String primaryGenre, List<String> otherGenres) {
+    public Movie(String name, String synopsis, LocalDate releaseDate, String director, List<String> actors,
+            String imageUrl, String primaryGenre, List<String> otherGenres) {
         this.name = name;
         this.synopsis = synopsis;
         this.releaseDate = releaseDate;
@@ -55,7 +58,8 @@ public class Movie {
     }
 
     public void addRating(int rating) {
-        if (rating < 1 || rating > 5) return; // Valida o intervalo de classificação
+        if (rating < 1 || rating > 5)
+            return; // Valida o intervalo de classificação
 
         // Incrementa o contador de votos para a classificação especificada
         ratings.put(rating, ratings.getOrDefault(rating, 0) + 1);

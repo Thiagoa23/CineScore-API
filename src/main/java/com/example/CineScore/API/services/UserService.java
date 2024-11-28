@@ -6,7 +6,6 @@ import com.example.CineScore.API.models.Comment;
 import com.example.CineScore.API.models.Notification;
 import com.example.CineScore.API.models.Report;
 import com.example.CineScore.API.repositories.UserRepository;
-import com.example.CineScore.API.repositories.AdminRepository;
 import com.example.CineScore.API.repositories.MovieRepository;
 import com.example.CineScore.API.repositories.NotificationRepository;
 import com.example.CineScore.API.repositories.ReportRepository;
@@ -24,9 +23,6 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private AdminRepository adminRepository;
-
-    @Autowired
     private MovieRepository movieRepository;
 
     @Autowired
@@ -37,8 +33,13 @@ public class UserService {
 
     public Optional<User> registerUser(User user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            return Optional.empty();
+            return Optional.empty(); // Retorna vazio se o usuário já existir
         }
+
+        // Atribuir o role padrão como USER
+        user.setRole("USER");
+
+        // Salvar o usuário no banco de dados
         return Optional.of(userRepository.save(user));
     }
 
@@ -74,12 +75,13 @@ public class UserService {
         return notificationRepository.findByUserId(userId);
     }
 
-    public void logoutUser(String userId) {
-        // Lógica para logout de um usuário padrão (pode limpar sessões ou tokens)
-    }
-
     public void reportUser(String reportedUserId, String reportingUserId, String reason) {
         Report report = new Report(reportedUserId, reportingUserId, reason);
         reportRepository.save(report);
     }
+
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
 }

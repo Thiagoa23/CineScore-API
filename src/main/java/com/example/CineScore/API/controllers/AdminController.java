@@ -41,8 +41,12 @@ public class AdminController {
     public ResponseEntity<?> loginAdmin(@RequestBody Map<String, String> loginData) {
         String username = loginData.get("username");
         String password = loginData.get("password");
-        // Lógica de autenticação
-        return ResponseEntity.ok("Admin logged in successfully");
+
+        Optional<Admin> adminOpt = adminService.findByUsername(username);
+        if (adminOpt.isPresent() && adminOpt.get().getPassword().equals(password)) {
+            return ResponseEntity.ok("Admin login successful");
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
     }
 
     @PostMapping("/logout")
