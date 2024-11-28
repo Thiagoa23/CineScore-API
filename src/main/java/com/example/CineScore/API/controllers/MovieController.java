@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,10 +29,18 @@ public class MovieController {
 
     // Endpoint para adicionar um novo filme
     @PostMapping
-    public ResponseEntity<Movie> addMovie(@RequestBody Movie movie) {
-        Optional<Movie> addedMovie = movieService.addMovie(movie);
-        return addedMovie.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+    public ResponseEntity<?> addMovie(@RequestBody Movie movie) {
+        try {
+            Optional<Movie> addedMovie = movieService.addMovie(movie);
+            if (addedMovie.isPresent()) {
+                return ResponseEntity.status(HttpStatus.CREATED).body(addedMovie.get());
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("O filme já existe no sistema.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao adicionar o filme.");
+        }
     }
 
     // Endpoint para atualizar um filme existente

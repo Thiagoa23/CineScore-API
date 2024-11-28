@@ -102,25 +102,28 @@ public class MovieService {
 
     // Obter os detalhes de um filme específico com todos os atributos
     public Optional<Movie> getMovieById(String movieId) {
-    System.out.println("Buscando filme com ID: " + movieId);
-    Optional<Movie> movie = movieRepository.findById(movieId);
-    if (movie.isPresent()) {
-        System.out.println("Filme encontrado: " + movie.get().getName());
-        expandGenres(movie.get());
-    } else {
-        System.out.println("Filme não encontrado para ID: " + movieId);
+        System.out.println("Buscando filme com ID: " + movieId);
+        Optional<Movie> movie = movieRepository.findById(movieId);
+        if (movie.isPresent()) {
+            System.out.println("Filme encontrado: " + movie.get().getName());
+            expandGenres(movie.get());
+        } else {
+            System.out.println("Filme não encontrado para ID: " + movieId);
+        }
+        return movie;
     }
-    return movie;
-}
-
 
     // Adicionar um novo filme
     public Optional<Movie> addMovie(Movie movie) {
+        System.out.println("Tentando adicionar filme: " + movie);
         Optional<Movie> existingMovie = movieRepository.findByNameIgnoreCase(movie.getName());
         if (existingMovie.isPresent()) {
+            System.out.println("Filme já existe no banco de dados: " + existingMovie.get().getName());
             return Optional.empty();
         } else {
-            return Optional.of(movieRepository.save(movie));
+            Movie savedMovie = movieRepository.save(movie);
+            System.out.println("Filme salvo com sucesso no banco de dados: " + savedMovie);
+            return Optional.of(savedMovie);
         }
     }
 
