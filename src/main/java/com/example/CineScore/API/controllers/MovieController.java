@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,25 +43,14 @@ public class MovieController {
 
     // Endpoint para remover um filme com validação de administrador
     @DeleteMapping("/{movieId}")
-    public ResponseEntity<?> deleteMovie(
-            @PathVariable String movieId,
-            @RequestParam String username,
-            @RequestParam String password) {
+    public ResponseEntity<?> deleteMovie(@PathVariable String movieId) {
+        boolean deleted = movieService.deleteMovie(movieId);
+        if (deleted) {
+            return ResponseEntity.ok(Map.of("message", "Movie deleted successfully"));
 
-        // Verificar se o usuário é um administrador válido
-        Optional<Admin> adminOpt = adminService.findByUsername(username);
-        if (adminOpt.isPresent() && adminOpt.get().getPassword().equals(password)) {
-            // Se as credenciais forem válidas, permite excluir o filme
-            boolean deleted = movieService.deleteMovie(movieId);
-            if (deleted) {
-                return ResponseEntity.ok("Movie deleted successfully");
-            } else {
-                return ResponseEntity.notFound().build(); // Filme não encontrado
-            }
+        } else {
+            return ResponseEntity.notFound().build(); // Filme não encontrado
         }
-
-        // Caso contrário, negar permissão
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permission denied");
     }
 
     // Endpoint para listar todos os filmes com gêneros expandidos
